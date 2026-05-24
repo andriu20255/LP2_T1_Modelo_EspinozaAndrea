@@ -24,7 +24,7 @@ public class Tecnico {
 	
 	
 	@Column (name = "nombre")
-	private Integer nombre;
+	private String nombre;
 	
 	@Column (name = "especialidad")
 	private String especialidad;
@@ -43,6 +43,10 @@ public class Tecnico {
 			return "Desconocido";
 		}
 		
+	}
+	
+	public String toString() {
+		return nombre;
 	}
 
 }

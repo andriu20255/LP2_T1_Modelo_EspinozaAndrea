@@ -196,7 +196,8 @@ public class DlgOrdenSoporte extends JDialog implements ActionListener {
 
 		habilitarEntradas(false);
 		habilitarBotones(true);
-		cargarComboBoxActividad();
+		cargarTecnicos();
+		cargarClientes();
 	}
 
 	public void actionPerformed(ActionEvent arg0) {
@@ -269,36 +270,94 @@ public class DlgOrdenSoporte extends JDialog implements ActionListener {
 		txtNroOrdenSoporte.requestFocus();
 	}
 
-	void cargarComboBoxActividad() {
-
-	}
-
-	void listar() {
-		EntityManager manager =JPAUtil.getEntityManager();
-		String jpql = "select o from OrdenSoporte o";
-		
-		try {
-		    List<OrdenSoporte> lstOrdenes = manager.createQuery(jpql, OrdenSoporte.class).getResultList();
-
-		    for (OrdenSoporte ordenSoporte : lstOrdenes) {
-		        Tecnico tecnico = ordenSoporte.getTecnico();
-		        Cliente cliente = ordenSoporte.getCliente();
-
-		        imprimir("Nro de Orden ...: " + ordenSoporte.getNroOrden());
-		        imprimir("Fecha de registro ...: " + ordenSoporte.getFechaRegistro());
-		        imprimir("Tecnico ...: " + tecnico.getNombre() + "especialista en" + tecnico.getEspecialidadDescripcion());
-		        imprimir("Cliente ...: " + cliente.getRuc() + "-" + cliente.getRazonSocial());
-		        imprimir("Monto ...: " + ordenSoporte.getMonto());
-		        imprimir("Detalle de Incidencia ...: " + ordenSoporte.getDetalleIncidencia());
-		    }
-					
+	void cargarTecnicos() {
+           EntityManager manager =JPAUtil.getEntityManager();
+           String jpql = "select t from Tecnico t";
+           
+           
+           try {
+			   List<Tecnico> lstTecnicos = manager.createQuery(jpql, Tecnico.class).getResultList();
+			   
+			   for (Tecnico tecnico : lstTecnicos) {
+				cboTecnicos.addItem(tecnico);
+			}
+			   
 		} finally {
 			manager.close();
 		}
 	}
+	void cargarClientes() {
+		EntityManager manager =JPAUtil.getEntityManager();
+        String jpql = "select c from Cliente c";
+        
+        
+        try {
+			   List<Cliente> lstCliente = manager.createQuery(jpql, Cliente.class).getResultList();
+			   
+			   for (Cliente cliente : lstCliente) {
+				cboClientes.addItem(cliente);
+			}
+			   
+		} finally {
+			manager.close();
+		}
+	}
+	void listar() {
+
+		 EntityManager manager = JPAUtil.getEntityManager();
+		 String jpql = "select o from OrdenSoporte o";
+
+		 try {
+
+		 List<OrdenSoporte> lstOrdenes = manager.createQuery(jpql, OrdenSoporte.class).getResultList();
+
+		 for (OrdenSoporte ordenSoporte : lstOrdenes) {
+		 Tecnico tecnico = ordenSoporte.getTecnico();
+		 Cliente cliente = ordenSoporte.getCliente();
+		 
+		 imprimir("Nro de orden......: "+ ordenSoporte.getNroOrden());
+		 imprimir("Fecha de registro.: "+ ordenSoporte.getFechaRegistro());
+		 imprimir("Técnico...........: "+ tecnico.getNombre() + " especialista en "+ tecnico.getEspecialidadDescripcion());
+		 imprimir("Cliente...........: "+ cliente.getRuc() + " - "+ cliente.getRazonSocial());
+		 imprimir("Monto.............: "+ "S/" + ordenSoporte.getMonto());
+		 imprimir("Detalle incidencia: "+  ordenSoporte.getDetalleIncidencia());
+		 imprimir("-------------------------------------\n");
+
+		 }
+
+		 
+
+		 } finally {
+
+		 manager.close();
+
+		 }
+	}
 
 	void adicionar() {
-		
+	    String detalleIncidencia = txtDetalleIncidencia.getText();
+	    Tecnico tecnico = (Tecnico) cboTecnicos.getSelectedItem();
+	    Cliente cliente = (Cliente) cboClientes.getSelectedItem();
+	    Double monto = Double.parseDouble(txtMonto.getText());
+
+	    EntityManager manager = JPAUtil.getEntityManager();
+	    
+	    try {
+	        OrdenSoporte ordenSoporte = new OrdenSoporte(null, null, tecnico, cliente, monto, detalleIncidencia);
+
+	        manager.getTransaction().begin();
+	        manager.persist(ordenSoporte);
+	        manager.getTransaction().commit();
+
+	        mensajeInfo("Orden de soporte registrada");
+	        limpiar();
+
+	    } catch (Exception e) {
+	        mensajeError("Hubo un error en la transacción");
+	        e.printStackTrace();
+	    } finally {
+	        manager.close();
+	    }
 	}
 
 	void consultar() {

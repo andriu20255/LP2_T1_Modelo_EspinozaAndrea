@@ -28,5 +28,10 @@ public class Cliente {
 	
 	@Column (name = "ruc")
 	private String ruc;
+	
+	@Override
+	public String toString() {
+		return razonSocial;
+	}
 
 }
